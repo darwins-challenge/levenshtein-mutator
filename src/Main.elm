@@ -1,5 +1,6 @@
-import Html exposing (Html, text)
+import Html exposing (Html, div, text, code)
 import Html.App exposing (beginnerProgram)
+import Html.Attributes exposing (class)
 import Random exposing (Seed, step, initialSeed)
 import Levenshtein exposing (levenshtein)
 
@@ -56,4 +57,22 @@ update message model =
 
 view : Model -> Html Message
 view model =
-  text <| toString <| levenshtein model.target model.current
+  let
+    distance = levenshtein model.target model.current
+  in
+    div []
+    [
+      div [] [
+        text "current:"
+      , code []
+          [
+            text "\""
+          , text model.current
+          , text "\""
+          ]
+      ]
+    , div [ class "debug" ]
+      [
+        text <| toString <| (levenshtein model.target model.current)
+      ]
+    ]

@@ -1,0 +1,15 @@
+{
+    "version": "1.0.0",
+    "summary": "Showing the power of mutation-search when the fitness function is monotonic",
+    "repository": "https://github.com/darwins-challenge/levenshtein-mutator.git",
+    "license": "MIT",
+    "source-directories": [
+        "./src"
+    ],
+    "exposed-modules": [],
+    "dependencies": {
+        "elm-lang/core": "4.0.1 <= v < 5.0.0",
+        "elm-lang/html": "1.0.0 <= v < 2.0.0"
+    },
+    "elm-version": "0.17.0 <= v < 0.18.0"
+}

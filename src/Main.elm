@@ -1,5 +1,6 @@
 import Html exposing (Html, text)
 import Html.App exposing (beginnerProgram)
+import Random exposing (Seed, step, initialSeed)
 import Levenshtein exposing (levenshtein)
 
 u : String
@@ -25,6 +26,7 @@ type alias Model =
   {
     target : String
   , current : String
+  , seed : Seed
   }
 
 
@@ -33,6 +35,7 @@ model =
   {
     target = "Hello, World!"
   , current = ""
+  , seed = initialSeed 0
   }
 
 

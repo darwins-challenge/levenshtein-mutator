@@ -1,0 +1,31 @@
+{
+  "name": "levenshtein-mutator",
+  "version": "1.0.0",
+  "description": "Showing the power of mutation-search when the fitness function is monotonic",
+  "main": "src/Main.elm",
+  "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "install": "./node_modules/.bin/elm package install",
+      "reactor": "./node_modules/.bin/elm reactor",
+      "make": "./node_modules/.bin/elm make src/Main.elm --output=visualize-ast.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darwins-challenge/ast-visualizer.git"
+  },
+  "keywords": [
+    "elm",
+    "levenshtein",
+    "search",
+    "AI"
+  ],
+  "author": "Daan van Berkel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/darwins-challenge/levenshtein-mutator/issues"
+  },
+  "homepage": "https://github.com/darwins-challenge/levenshtein-mutator#readme",
+  "devDependencies": {
+    "elm": "^0.17.0"
+  }
+}

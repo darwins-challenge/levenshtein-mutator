@@ -3,7 +3,7 @@ import Html.App exposing (beginnerProgram)
 import Html.Attributes exposing (class)
 import Random exposing (Seed, step, initialSeed)
 import Levenshtein exposing (levenshtein)
-
+import Mutate exposing (mutate)
 
 main : Program Never
 main =

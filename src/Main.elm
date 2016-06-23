@@ -4,11 +4,6 @@ import Html.Attributes exposing (class)
 import Random exposing (Seed, step, initialSeed)
 import Levenshtein exposing (levenshtein)
 
-u : String
-u = "kangaroo"
-
-v : String
-v = "koala"
 
 main : Program Never
 main =

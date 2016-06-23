@@ -1,6 +1,7 @@
-import Html exposing (Html, div, text, code)
+import Html exposing (Html, div, text, code, button)
 import Html.App exposing (beginnerProgram)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import Random exposing (Seed, step, initialSeed)
 import Levenshtein exposing (levenshtein)
 import Mutate exposing (mutate)
@@ -39,12 +40,20 @@ model =
 
 
 type Message =
-  DoNothing
+    Mutate
+  | DoNothing
 
 
 update : Message -> Model -> Model
 update message model =
-  model
+  case message of
+    Mutate -> 
+      let
+        (next, seed') = step (mutate model.current) model.seed
+      in
+        { model | current = next, seed = seed' }
+    _ ->
+      model
 
 
 -- VIEW
@@ -57,7 +66,8 @@ view model =
   in
     div []
     [
-      div [] [
+      button [ onClick Mutate ] [ text "Mutate" ]
+    , div [] [
         text "current:"
       , code []
           [

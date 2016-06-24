@@ -23,6 +23,8 @@ type alias Model =
   {
     target : String
   , current : String
+  , best : String
+  , distance : Int
   , seed : Seed
   }
 
@@ -31,10 +33,16 @@ init : String -> Model
 init target =
   let
     current = ""
+
+    best = current
+
+    distance = levenshtein target current
   in
     {
       target = target
     , current = current
+    , best = best
+    , distance = distance
     , seed = initialSeed 0
     }
 
@@ -51,9 +59,23 @@ update message model =
   case message of
     Mutate -> 
       let
-        (next, seed') = step (mutate model.current) model.seed
+        (next, seed') = step (mutate model.best) model.seed
+
+        nextDistance = levenshtein model.target next
+
+        distance = min model.distance nextDistance
+
+        best =
+          if nextDistance < model.distance then
+            next
+          else
+            model.best
       in
-        { model | current = next, seed = seed' }
+        { model
+          | current = next
+          , distance = distance
+          , best = best
+          , seed = seed' }
     _ ->
       model
 
@@ -77,9 +99,19 @@ view model =
           , text model.current
           , text "\""
           ]
+      , text " "
+      , text "best:"
+      , code []
+          [
+            text "\""
+          , text model.best
+          , text "\""
+          ]
       ]
     , div [ class "debug" ]
       [
         text <| toString <| (levenshtein model.target model.current)
+      , text " "
+      , text <| toString <| model.distance
       ]
     ]

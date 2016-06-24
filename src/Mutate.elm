@@ -1,7 +1,7 @@
 module Mutate exposing (mutate)
 
 import Random exposing (Generator, Seed, int, map, andThen, pair)
-import String exposing (length, isEmpty, left, dropLeft, concat)
+import String exposing (length, isEmpty, left, dropLeft, concat, fromChar)
 import Char exposing (fromCode)
 
 
@@ -24,14 +24,14 @@ mutation =
     map chooseMutation (int 0 2)
 
 
-ascii : Generator Char
-ascii = 
+upper : Generator Char
+upper =
   let
     char : Int -> Int -> Generator Char
     char low high =
       map fromCode (int low high)
   in
-    char 0 127
+    char 65 90
 
 identity : String -> Generator String
 identity word =
@@ -46,7 +46,7 @@ inserter word =
       concat
         [
           left n word
-        , toString character
+        , fromChar character
         , dropLeft n word
         ]
 
@@ -54,7 +54,7 @@ inserter word =
     insert data =
       identity (insertAt data)
   in
-    pair ascii (int 0 ((length word) - 1)) `andThen` insert
+    pair upper (int 0 ((length word) - 1)) `andThen` insert
 
 
 deleter : String -> Generator String
@@ -86,7 +86,7 @@ editer word =
       concat
         [
           left (n - 1) word
-        , toString character
+        , fromChar character
         , dropLeft n word
         ]
 
@@ -94,7 +94,7 @@ editer word =
     replace data =
         identity (replaceAt data)
   in
-    pair ascii (int 0 ((length word) - 1)) `andThen` replace
+    pair upper (int 0 ((length word) - 1)) `andThen` replace
 
 
 

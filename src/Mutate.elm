@@ -54,7 +54,7 @@ inserter word =
     insert data =
       identity (insertAt data)
   in
-    pair upper (int 0 ((length word) - 1)) `andThen` insert
+    pair upper (int 0 (length word)) `andThen` insert
 
 
 deleter : String -> Generator String

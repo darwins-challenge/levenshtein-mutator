@@ -3,6 +3,7 @@ import Html.App exposing (program)
 import Html.Attributes exposing (class)
 import Random exposing (Seed, step, initialSeed)
 import Time exposing (Time, millisecond)
+import Keyboard exposing (KeyCode)
 
 import Levenshtein exposing (levenshtein)
 import Mutate exposing (mutate)
@@ -61,6 +62,7 @@ init target =
 
 type Message =
     Mutate
+  | Toggle
   | DoNothing
 
 
@@ -90,6 +92,18 @@ update message model =
            }, Cmd.none)
       else
         (model, Cmd.none)
+
+    Toggle ->
+      let
+        nextState =
+          case model.state of
+            Pauzed -> Running
+
+            Running -> Pauzed
+
+            _ -> model.state
+      in
+        ({ model | state = nextState }, Cmd.none)
     _ ->
       (model, Cmd.none)
 
@@ -134,4 +148,14 @@ view model =
 
 subscriptions : Model -> Sub Message
 subscriptions model =
-  Time.every (100 * millisecond) (\_ -> Mutate)
+  Sub.batch [
+    Keyboard.downs handlePress
+  , Time.every (100 * millisecond) (\_ -> Mutate)
+  ]
+
+handlePress : KeyCode -> Message
+handlePress keycode =
+  case keycode of
+    80 -> Toggle
+
+    _ -> DoNothing

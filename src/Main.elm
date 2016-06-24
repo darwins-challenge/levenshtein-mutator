@@ -10,7 +10,7 @@ main : Program Never
 main =
   beginnerProgram
   {
-    model = model
+    model = init "ABBA"
   , update = update
   , view = view
   }
@@ -27,14 +27,16 @@ type alias Model =
   }
 
 
-model : Model
-model =
-  {
-    target = "Hello, World!"
-  , current = ""
-  , seed = initialSeed 0
-  }
-
+init : String -> Model
+init target =
+  let
+    current = ""
+  in
+    {
+      target = target
+    , current = current
+    , seed = initialSeed 0
+    }
 
 -- UPDATE
 

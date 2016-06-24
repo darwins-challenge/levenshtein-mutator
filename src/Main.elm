@@ -1,18 +1,19 @@
 import Html exposing (Html, div, text, code, button)
-import Html.App exposing (beginnerProgram)
+import Html.App exposing (program)
 import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
 import Random exposing (Seed, step, initialSeed)
+import Time exposing (Time, millisecond)
 import Levenshtein exposing (levenshtein)
 import Mutate exposing (mutate)
 
 main : Program Never
 main =
-  beginnerProgram
+  program
   {
-    model = init "ABBA"
+    init = init "ABBA"
   , update = update
   , view = view
+  , subscriptions = subscriptions
   }
 
 
@@ -29,7 +30,7 @@ type alias Model =
   }
 
 
-init : String -> Model
+init : String -> (Model, Cmd Message)
 init target =
   let
     current = ""
@@ -38,26 +39,27 @@ init target =
 
     distance = levenshtein target current
   in
-    {
+    ({
       target = target
     , current = current
     , best = best
     , distance = distance
     , seed = initialSeed 0
     }
+    , Cmd.none)
 
 -- UPDATE
 
 
 type Message =
-    Mutate
+    Mutate 
   | DoNothing
 
 
-update : Message -> Model -> Model
+update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
-    Mutate -> 
+    Mutate ->
       let
         (next, seed') = step (mutate model.best) model.seed
 
@@ -71,13 +73,14 @@ update message model =
           else
             model.best
       in
-        { model
+        ({ model
           | current = next
           , distance = distance
           , best = best
-          , seed = seed' }
+          , seed = seed'
+         }, Cmd.none)
     _ ->
-      model
+      (model, Cmd.none)
 
 
 -- VIEW
@@ -90,8 +93,7 @@ view model =
   in
     div []
     [
-      button [ onClick Mutate ] [ text "Mutate" ]
-    , div [] [
+      div [] [
         text "current:"
       , code []
           [
@@ -115,3 +117,10 @@ view model =
       , text <| toString <| model.distance
       ]
     ]
+
+
+-- SUBSCRIPTIONS
+
+subscriptions : Model -> Sub Message
+subscriptions model =
+  Time.every (100 * millisecond) (\_ -> Mutate)

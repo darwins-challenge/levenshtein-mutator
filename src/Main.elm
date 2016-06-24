@@ -3,6 +3,7 @@ import Html.App exposing (program)
 import Html.Attributes exposing (class)
 import Random exposing (Seed, step, initialSeed)
 import Time exposing (Time, millisecond)
+
 import Levenshtein exposing (levenshtein)
 import Mutate exposing (mutate)
 
@@ -20,9 +21,15 @@ main =
 -- MODEL
 
 
+type State =
+    Pauzed
+  | Running
+  | Finished
+
 type alias Model =
   {
     target : String
+  , state : State
   , current : String
   , best : String
   , distance : Int
@@ -41,6 +48,7 @@ init target =
   in
     ({
       target = target
+    , state = Running
     , current = current
     , best = best
     , distance = distance
@@ -52,7 +60,7 @@ init target =
 
 
 type Message =
-    Mutate 
+    Mutate
   | DoNothing
 
 
@@ -60,25 +68,28 @@ update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
     Mutate ->
-      let
-        (next, seed') = step (mutate model.best) model.seed
+      if model.state == Running then
+        let
+          (next, seed') = step (mutate model.best) model.seed
 
-        nextDistance = levenshtein model.target next
+          nextDistance = levenshtein model.target next
 
-        distance = min model.distance nextDistance
+          distance = min model.distance nextDistance
 
-        best =
-          if nextDistance < model.distance then
-            next
-          else
-            model.best
-      in
-        ({ model
+          best =
+            if nextDistance < model.distance then
+              next
+            else
+              model.best
+        in
+          ({ model
           | current = next
           , distance = distance
           , best = best
           , seed = seed'
-         }, Cmd.none)
+           }, Cmd.none)
+      else
+        (model, Cmd.none)
     _ ->
       (model, Cmd.none)
 

@@ -78,6 +78,12 @@ update message model =
 
           distance = min model.distance nextDistance
 
+          nextState =
+            if distance == 0 then
+              Finished
+            else
+              model.state
+
           best =
             if nextDistance < model.distance then
               next
@@ -86,6 +92,7 @@ update message model =
         in
           ({ model
           | current = next
+          , state = nextState
           , distance = distance
           , best = best
           , seed = seed'

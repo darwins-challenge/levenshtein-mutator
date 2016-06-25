@@ -63,6 +63,7 @@ init target =
 type Message =
     Mutate
   | Toggle
+  | Restart
   | DoNothing
 
 
@@ -111,6 +112,10 @@ update message model =
             _ -> model.state
       in
         ({ model | state = nextState }, Cmd.none)
+
+    Restart ->
+      init model.target
+
     _ ->
       (model, Cmd.none)
 
@@ -164,5 +169,7 @@ handlePress : KeyCode -> Message
 handlePress keycode =
   case keycode of
     80 -> Toggle
+
+    82 -> Restart
 
     _ -> DoNothing

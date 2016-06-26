@@ -33,6 +33,25 @@ upper =
   in
     char 65 90
 
+
+space : Generator Char
+space =
+  map (\_ -> ' ') (int 0 1)
+
+
+either : Generator Char -> Generator Char -> Generator Char
+either left right =
+  let
+    selectGenerator : Int -> Generator Char
+    selectGenerator n =
+      case n of
+        0 -> left
+
+        _ -> right
+  in
+    (int 0 1) `andThen` selectGenerator
+
+
 identity : String -> Generator String
 identity word =
   map (\_ -> word) (int 0 1)
@@ -54,7 +73,7 @@ inserter word =
     insert data =
       identity (insertAt data)
   in
-    pair upper (int 0 (length word)) `andThen` insert
+    pair (either space upper) (int 0 (length word)) `andThen` insert
 
 
 deleter : String -> Generator String

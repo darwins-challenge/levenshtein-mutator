@@ -32,8 +32,7 @@ type alias Model =
     target : String
   , state : State
   , current : String
-  , best : String
-  , distance : Int
+  , best : (String, Int)
   , seed : Seed
   }
 
@@ -51,8 +50,7 @@ init target =
       target = target
     , state = Running
     , current = current
-    , best = best
-    , distance = distance
+    , best = (best, distance)
     , seed = initialSeed 0
     }
     , Cmd.none)
@@ -73,11 +71,13 @@ update message model =
     Mutate ->
       if model.state == Running then
         let
-          (next, seed') = step (mutate model.best) model.seed
+          (currentBest, currentDistance) = model.best
+
+          (next, seed') = step (mutate currentBest) model.seed
 
           nextDistance = levenshtein model.target next
 
-          distance = min model.distance nextDistance
+          distance = min currentDistance nextDistance
 
           nextState =
             if distance == 0 then
@@ -86,15 +86,14 @@ update message model =
               model.state
 
           best =
-            if nextDistance < model.distance then
-              next
+            if nextDistance < currentDistance then
+              (next, nextDistance)
             else
               model.best
         in
           ({ model
           | current = next
           , state = nextState
-          , distance = distance
           , best = best
           , seed = seed'
            }, Cmd.none)
@@ -126,7 +125,9 @@ update message model =
 view : Model -> Html Message
 view model =
   let
-    distance = levenshtein model.target model.current
+    best = (fst model.best)
+
+    distance = (snd model.best)
   in
     div []
     [
@@ -143,7 +144,7 @@ view model =
       , code []
           [
             text "\""
-          , text model.best
+          , text best
           , text "\""
           ]
       ]
@@ -151,7 +152,7 @@ view model =
       [
         text <| toString <| (levenshtein model.target model.current)
       , text " "
-      , text <| toString <| model.distance
+      , text <| toString <| distance
       ]
     ]
 

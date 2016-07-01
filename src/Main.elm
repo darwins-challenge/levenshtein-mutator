@@ -81,41 +81,48 @@ type Message =
   | DoNothing
 
 
+next : Model -> TrackRecord -> Seed -> (TrackRecord, Seed)
+next model trackRecord seed =
+  let
+    (nextCurrent, seed') = step (mutate trackRecord.best) model.seed
+
+    currentBestDistance = trackRecord.bestDistance
+
+    nextCurrentDistance = levenshtein model.target nextCurrent
+
+    distance = min currentBestDistance nextCurrentDistance
+
+    nextTrackRecord =
+      if nextCurrentDistance < currentBestDistance then
+        {
+          best = nextCurrent
+        , bestDistance = nextCurrentDistance
+        , current = nextCurrent
+        , currentDistance = nextCurrentDistance
+        }
+      else
+        { trackRecord |
+            current = nextCurrent
+        , currentDistance = nextCurrentDistance
+        }
+  in
+    (nextTrackRecord, seed')
+
+
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
     Mutate ->
       if model.state == Running then
         let
-          trackRecord = model.trackRecord
-
-          currentBestDistance = trackRecord.bestDistance
-
-          (nextCurrent, seed') = step (mutate trackRecord.best) model.seed
-
-          nextCurrentDistance = levenshtein model.target nextCurrent
-
-          distance = min currentBestDistance nextCurrentDistance
+          (nextTrackRecord, seed') =
+            next model model.trackRecord model.seed
 
           nextState =
-            if distance == 0 then
+            if nextTrackRecord.bestDistance == 0 then
               Finished
             else
               model.state
-
-          nextTrackRecord =
-            if nextCurrentDistance < currentBestDistance then
-              {
-                best = nextCurrent
-              , bestDistance = nextCurrentDistance
-              , current = nextCurrent
-              , currentDistance = nextCurrentDistance
-              }
-            else
-              { trackRecord |
-                current = nextCurrent
-              , currentDistance = nextCurrentDistance
-              }
         in
           ({ model |
             state = nextState

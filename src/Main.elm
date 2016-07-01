@@ -154,13 +154,15 @@ update message model =
 view : Model -> Html Message
 view model =
   let
-    best = (fst model.best)
+    trackRecord = model.trackRecord
 
-    bestDistance = (snd model.best)
+    best = trackRecord.best
 
-    current = model.current
+    bestDistance = trackRecord.bestDistance
 
-    currentDistance = (levenshtein model.target model.current)
+    current = trackRecord.current
+
+    currentDistance = trackRecord.currentDistance
   in
     div []
     [

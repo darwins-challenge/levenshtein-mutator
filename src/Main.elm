@@ -27,12 +27,23 @@ type State =
   | Running
   | Finished
 
+
+type alias TrackRecord =
+  {
+    best : String
+  , bestDistance : Int
+  , current : String
+  , currentDistance : Int
+  }
+
+
 type alias Model =
   {
     target : String
   , state : State
   , current : String
   , best : (String, Int)
+  , trackRecord: TrackRecord
   , seed : Seed
   }
 
@@ -51,6 +62,13 @@ init target =
     , state = Running
     , current = current
     , best = (best, distance)
+    , trackRecord =
+        {
+          best = best
+        , bestDistance = distance
+        , current = current
+        , currentDistance = distance
+        }
     , seed = initialSeed 0
     }
     , Cmd.none)
@@ -71,9 +89,11 @@ update message model =
     Mutate ->
       if model.state == Running then
         let
+          trackRecord = model.trackRecord
+
           (currentBest, currentDistance) = model.best
 
-          (next, seed') = step (mutate currentBest) model.seed
+          (next, seed') = step (mutate trackRecord.best) model.seed
 
           nextDistance = levenshtein model.target next
 
@@ -90,11 +110,20 @@ update message model =
               (next, nextDistance)
             else
               model.best
+
+          nextTrackRecord =
+            {
+              best = (fst best)
+            , bestDistance = (snd best)
+            , current = next
+            , currentDistance = nextDistance
+            }
         in
           ({ model
           | current = next
           , state = nextState
           , best = best
+          , trackRecord = nextTrackRecord
           , seed = seed'
            }, Cmd.none)
       else

@@ -46,30 +46,33 @@ type alias Model =
   }
 
 
-init : String -> (Model, Cmd Message)
-init target =
+initialTrackRecord : String -> TrackRecord
+initialTrackRecord target =
   let
     current = ""
 
     best = current
 
     distance = levenshtein target current
-
-    trackRecord =
-      {
-        best = best
-      , bestDistance = distance
-      , current = current
-      , currentDistance = distance
-      }
   in
-    ({
-      target = target
-    , state = Running
-    , trackRecord = trackRecord
-    , seed = initialSeed 0
+    {
+      best = best
+    , bestDistance = distance
+    , current = current
+    , currentDistance = distance
     }
-    , Cmd.none)
+
+
+init : String -> (Model, Cmd Message)
+init target =
+  ({
+    target = target
+  , state = Running
+  , trackRecord = initialTrackRecord target
+  , seed = initialSeed 0
+  }
+  , Cmd.none)
+
 
 -- UPDATE
 

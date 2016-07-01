@@ -41,8 +41,6 @@ type alias Model =
   {
     target : String
   , state : State
-  , current : String
-  , best : (String, Int)
   , trackRecord: TrackRecord
   , seed : Seed
   }
@@ -56,19 +54,19 @@ init target =
     best = current
 
     distance = levenshtein target current
+
+    trackRecord =
+      {
+        best = best
+      , bestDistance = distance
+      , current = current
+      , currentDistance = distance
+      }
   in
     ({
       target = target
     , state = Running
-    , current = current
-    , best = (best, distance)
-    , trackRecord =
-        {
-          best = best
-        , bestDistance = distance
-        , current = current
-        , currentDistance = distance
-        }
+    , trackRecord = trackRecord
     , seed = initialSeed 0
     }
     , Cmd.none)
@@ -91,8 +89,6 @@ update message model =
         let
           trackRecord = model.trackRecord
 
-          currentBest = trackRecord.best
-
           currentBestDistance = trackRecord.bestDistance
 
           (nextCurrent, seed') = step (mutate trackRecord.best) model.seed
@@ -106,12 +102,6 @@ update message model =
               Finished
             else
               model.state
-
-          nextBest =
-            if nextCurrentDistance < currentBestDistance then
-              (nextCurrent, nextCurrentDistance)
-            else
-              (currentBest, currentBestDistance)
 
           nextTrackRecord =
             if nextCurrentDistance < currentBestDistance then
@@ -127,10 +117,8 @@ update message model =
               , currentDistance = nextCurrentDistance
               }
         in
-          ({ model
-          | current = nextCurrent
-          , state = nextState
-          , best = nextBest
+          ({ model |
+            state = nextState
           , trackRecord = nextTrackRecord
           , seed = seed'
            }, Cmd.none)

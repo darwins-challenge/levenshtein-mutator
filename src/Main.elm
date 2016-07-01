@@ -81,14 +81,14 @@ type Message =
   | DoNothing
 
 
-next : Model -> TrackRecord -> Seed -> (TrackRecord, Seed)
-next model trackRecord seed =
+next : String -> TrackRecord -> Seed -> (TrackRecord, Seed)
+next target trackRecord seed =
   let
-    (nextCurrent, seed') = step (mutate trackRecord.best) model.seed
+    (nextCurrent, seed') = step (mutate trackRecord.best) seed
 
     currentBestDistance = trackRecord.bestDistance
 
-    nextCurrentDistance = levenshtein model.target nextCurrent
+    nextCurrentDistance = levenshtein target nextCurrent
 
     distance = min currentBestDistance nextCurrentDistance
 
@@ -116,7 +116,7 @@ update message model =
       if model.state == Running then
         let
           (nextTrackRecord, seed') =
-            next model model.trackRecord model.seed
+            next model.target model.trackRecord model.seed
 
           nextState =
             if nextTrackRecord.bestDistance == 0 then

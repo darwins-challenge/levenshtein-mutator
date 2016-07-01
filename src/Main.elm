@@ -156,7 +156,11 @@ view model =
   let
     best = (fst model.best)
 
-    distance = (snd model.best)
+    bestDistance = (snd model.best)
+
+    current = model.current
+
+    currentDistance = (levenshtein model.target model.current)
   in
     div []
     [
@@ -165,7 +169,7 @@ view model =
       , code []
           [
             text "\""
-          , text model.current
+          , text current
           , text "\""
           ]
       , text " "
@@ -179,9 +183,9 @@ view model =
       ]
     , div [ class "debug" ]
       [
-        text <| toString <| (levenshtein model.target model.current)
+        text <| toString <| currentDistance
       , text " "
-      , text <| toString <| distance
+      , text <| toString <| bestDistance
       ]
     ]
 

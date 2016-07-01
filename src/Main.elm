@@ -91,13 +91,15 @@ update message model =
         let
           trackRecord = model.trackRecord
 
-          (currentBest, currentDistance) = model.best
+          currentBest = trackRecord.best
 
-          (next, seed') = step (mutate trackRecord.best) model.seed
+          currentBestDistance = trackRecord.bestDistance
 
-          nextDistance = levenshtein model.target next
+          (nextCurrent, seed') = step (mutate trackRecord.best) model.seed
 
-          distance = min currentDistance nextDistance
+          nextCurrentDistance = levenshtein model.target nextCurrent
+
+          distance = min currentBestDistance nextCurrentDistance
 
           nextState =
             if distance == 0 then
@@ -105,24 +107,24 @@ update message model =
             else
               model.state
 
-          best =
-            if nextDistance < currentDistance then
-              (next, nextDistance)
+          nextBest =
+            if nextCurrentDistance < currentBestDistance then
+              (nextCurrent, nextCurrentDistance)
             else
-              model.best
+              (currentBest, currentBestDistance)
 
           nextTrackRecord =
             {
-              best = (fst best)
-            , bestDistance = (snd best)
-            , current = next
-            , currentDistance = nextDistance
+              best = (fst nextBest)
+            , bestDistance = (snd nextBest)
+            , current = nextCurrent
+            , currentDistance = nextCurrentDistance
             }
         in
           ({ model
-          | current = next
+          | current = nextCurrent
           , state = nextState
-          , best = best
+          , best = nextBest
           , trackRecord = nextTrackRecord
           , seed = seed'
            }, Cmd.none)

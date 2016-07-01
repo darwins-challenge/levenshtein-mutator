@@ -1,6 +1,7 @@
 import Html exposing (Html, div, text, code, button)
 import Html.App exposing (program)
 import Html.Attributes exposing (class)
+import List exposing (head)
 import Random exposing (Seed, step, initialSeed)
 import Time exposing (Time, millisecond)
 import Keyboard exposing (KeyCode)
@@ -41,7 +42,7 @@ type alias Model =
   {
     target : String
   , state : State
-  , trackRecord: TrackRecord
+  , trackRecords: List TrackRecord
   , seed : Seed
   }
 
@@ -68,7 +69,7 @@ init target =
   ({
     target = target
   , state = Running
-  , trackRecord = initialTrackRecord target
+  , trackRecords = [ initialTrackRecord target ]
   , seed = initialSeed 0
   }
   , Cmd.none)
@@ -118,8 +119,14 @@ update message model =
     Mutate ->
       if model.state == Running then
         let
+          trackRecord =
+            case head model.trackRecords of
+              Just trackRecord -> trackRecord
+
+              Nothing -> initialTrackRecord ""
+
           (nextTrackRecord, seed') =
-            next model.target model.trackRecord model.seed
+            next model.target trackRecord model.seed
 
           nextState =
             if nextTrackRecord.bestDistance == 0 then
@@ -129,7 +136,7 @@ update message model =
         in
           ({ model |
             state = nextState
-          , trackRecord = nextTrackRecord
+          , trackRecords = [ nextTrackRecord ]
           , seed = seed'
            }, Cmd.none)
       else
@@ -160,7 +167,11 @@ update message model =
 view : Model -> Html Message
 view model =
   let
-    trackRecord = model.trackRecord
+    trackRecord =
+      case head model.trackRecords of
+        Just trackRecord -> trackRecord
+
+        Nothing -> initialTrackRecord ""
 
     best = trackRecord.best
 

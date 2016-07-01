@@ -114,12 +114,18 @@ update message model =
               (currentBest, currentBestDistance)
 
           nextTrackRecord =
-            {
-              best = (fst nextBest)
-            , bestDistance = (snd nextBest)
-            , current = nextCurrent
-            , currentDistance = nextCurrentDistance
-            }
+            if nextCurrentDistance < currentBestDistance then
+              {
+                best = nextCurrent
+              , bestDistance = nextCurrentDistance
+              , current = nextCurrent
+              , currentDistance = nextCurrentDistance
+              }
+            else
+              { trackRecord |
+                current = nextCurrent
+              , currentDistance = nextCurrentDistance
+              }
         in
           ({ model
           | current = nextCurrent

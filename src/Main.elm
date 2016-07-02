@@ -1,7 +1,7 @@
 import Html exposing (Html, div, text, code, button)
 import Html.App exposing (program)
 import Html.Attributes exposing (class)
-import List exposing (head, repeat, map, filter, maximum)
+import List exposing (head, repeat, map, filter, minimum)
 import Random exposing (Seed, step, initialSeed)
 import Time exposing (Time, millisecond)
 import Keyboard exposing (KeyCode)
@@ -115,30 +115,45 @@ next target trackRecord seed =
     (nextTrackRecord, seed')
 
 
+updateTrackRecords : String -> Seed -> List TrackRecord -> (List TrackRecord, Seed)
+updateTrackRecords target seed trackRecords =
+  case trackRecords of
+    trackRecord :: rest ->
+      let
+        (nextTrackRecord, seed') = (next target trackRecord seed)
+
+        (nextRest, seed'') = (updateTrackRecords target seed' rest)
+      in
+        (nextTrackRecord :: nextRest, seed'')
+
+    [] ->
+      ([], seed)
+
+
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
     Mutate ->
       if model.state == Running then
         let
-          trackRecord =
-            case head model.trackRecords of
-              Just trackRecord -> trackRecord
+          (updatedTrackRecords, seed') =
+            updateTrackRecords model.target model.seed model.trackRecords
 
-              Nothing -> initialTrackRecord ""
+          bestDistance =
+            case minimum <| map (\tr -> tr.bestDistance) updatedTrackRecords of
+              Just distance -> distance
 
-          (nextTrackRecord, seed') =
-            next model.target trackRecord model.seed
+              Nothing -> 0
 
           nextState =
-            if nextTrackRecord.bestDistance == 0 then
+            if bestDistance == 0 then
               Finished
             else
               model.state
         in
           ({ model |
             state = nextState
-          , trackRecords = [ nextTrackRecord ]
+          , trackRecords = updatedTrackRecords
           , seed = seed'
            }, Cmd.none)
       else
@@ -176,7 +191,7 @@ view model =
         Nothing -> initialTrackRecord ""
 
     bestDistance =
-      case maximum <| map (\tr -> tr.bestDistance) model.trackRecords of
+      case minimum <| map (\tr -> tr.bestDistance) model.trackRecords of
         Just distance -> distance
 
         Nothing -> 0
@@ -188,7 +203,7 @@ view model =
         Nothing -> ""
 
     currentDistance =
-      case maximum <| map (\tr -> tr.currentDistance) model.trackRecords of
+      case minimum <| map (\tr -> tr.currentDistance) model.trackRecords of
         Just distance -> distance
 
         Nothing -> 0

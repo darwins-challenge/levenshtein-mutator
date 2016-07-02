@@ -1,7 +1,7 @@
 import Html exposing (Html, div, text, code, button)
 import Html.App exposing (program)
 import Html.Attributes exposing (class)
-import List exposing (head)
+import List exposing (head, repeat, map, filter, maximum)
 import Random exposing (Seed, step, initialSeed)
 import Time exposing (Time, millisecond)
 import Keyboard exposing (KeyCode)
@@ -13,7 +13,7 @@ main : Program Never
 main =
   program
   {
-    init = init "ABBA"
+    init = init "ABBA" 1
   , update = update
   , view = view
   , subscriptions = subscriptions
@@ -43,6 +43,7 @@ type alias Model =
     target : String
   , state : State
   , trackRecords: List TrackRecord
+  , size : Int
   , seed : Seed
   }
 
@@ -64,12 +65,13 @@ initialTrackRecord target =
     }
 
 
-init : String -> (Model, Cmd Message)
-init target =
+init : String -> Int -> (Model, Cmd Message)
+init target n =
   ({
     target = target
   , state = Running
-  , trackRecords = [ initialTrackRecord target ]
+  , trackRecords = repeat n (initialTrackRecord target)
+  , size = n
   , seed = initialSeed 0
   }
   , Cmd.none)
@@ -155,7 +157,7 @@ update message model =
         ({ model | state = nextState }, Cmd.none)
 
     Restart ->
-      init model.target
+      init model.target model.size
 
     _ ->
       (model, Cmd.none)
@@ -173,13 +175,29 @@ view model =
 
         Nothing -> initialTrackRecord ""
 
-    best = trackRecord.best
+    bestDistance =
+      case maximum <| map (\tr -> tr.bestDistance) model.trackRecords of
+        Just distance -> distance
 
-    bestDistance = trackRecord.bestDistance
+        Nothing -> 0
 
-    current = trackRecord.current
+    best =
+      case head <| filter (\tr -> tr.bestDistance == bestDistance) model.trackRecords of
+        Just trackRecord -> trackRecord.best
 
-    currentDistance = trackRecord.currentDistance
+        Nothing -> ""
+
+    currentDistance =
+      case maximum <| map (\tr -> tr.currentDistance) model.trackRecords of
+        Just distance -> distance
+
+        Nothing -> 0
+
+    current =
+      case head <| filter (\tr -> tr.currentDistance == currentDistance) model.trackRecords of
+        Just trackRecord -> trackRecord.current
+
+        Nothing -> ""
   in
     div []
     [

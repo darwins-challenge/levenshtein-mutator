@@ -44,6 +44,7 @@ type alias Model =
   , state : State
   , trackRecords: List TrackRecord
   , size : Int
+  , iteration: Int
   , seed : Seed
   }
 
@@ -72,6 +73,7 @@ init target n =
   , state = Running
   , trackRecords = repeat n (initialTrackRecord target)
   , size = n
+  , iteration = 0
   , seed = initialSeed 0
   }
   , Cmd.none)
@@ -150,11 +152,15 @@ update message model =
               Finished
             else
               model.state
+
+          nextIteration =
+            model.iteration + 1
         in
           ({ model |
-            state = nextState
-          , trackRecords = updatedTrackRecords
-          , seed = seed'
+             state = nextState
+           , trackRecords = updatedTrackRecords
+           , seed = seed'
+           , iteration = nextIteration
            }, Cmd.none)
       else
         (model, Cmd.none)
@@ -184,11 +190,7 @@ update message model =
 view : Model -> Html Message
 view model =
   let
-    trackRecord =
-      case head model.trackRecords of
-        Just trackRecord -> trackRecord
-
-        Nothing -> initialTrackRecord ""
+    iteration = model.iteration
 
     bestDistance =
       case minimum <| map (\tr -> tr.bestDistance) model.trackRecords of
@@ -235,7 +237,9 @@ view model =
       ]
     , div [ class "debug" ]
       [
-        text <| toString <| currentDistance
+        text <| toString <| iteration
+      , text " "
+      , text <| toString <| currentDistance
       , text " "
       , text <| toString <| bestDistance
       ]

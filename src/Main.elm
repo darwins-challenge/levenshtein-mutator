@@ -13,7 +13,7 @@ main : Program Never
 main =
   program
   {
-    init = init "ABBA" 1
+    init = init "HELLO" 100
   , update = update
   , view = view
   , subscriptions = subscriptions
